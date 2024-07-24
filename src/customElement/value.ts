@@ -1,21 +1,26 @@
+import { z } from "zod";
+
 export type Value = Readonly<{
-  valueKey: string;
+  formId: string;
 }>;
 
-export const parseValue = (input: string | null): Value | null | "invalidValue" => {
-  if (input === null) {
-    return null;
-  }
+const valueSchema: z.Schema<Value | null> = z.object({
+  formId: z.string(),
+}).nullable();
 
+const parseJson = (input: string | null) => {
   try {
-    const parsedValue = JSON.parse(input);
-
-    return isValidValue(parsedValue) ? parsedValue : "invalidValue";
+    return JSON.parse(input ?? "null");
   }
   catch (e) {
-    return "invalidValue";
+    return null;
   }
 };
 
-const isValidValue = (obj: Readonly<Record<string, unknown>>) =>
-  "valueKey" in obj;
+const jsonValueSchema = z.string().nullable().transform(parseJson).pipe(valueSchema);
+
+export const parseValue = (input: string | null): Value | null | "invalidValue" => {
+  const parsedValue = jsonValueSchema.safeParse(input);
+
+  return parsedValue.success ? parsedValue.data : "invalidValue";
+};

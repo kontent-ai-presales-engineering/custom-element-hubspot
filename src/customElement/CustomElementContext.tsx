@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useLayoutEffect, useMemo } from "react";
 import { ReactNode, useState } from "react";
-import { Config, isConfig } from "./config";
+import { Config } from "./config";
 import { Value, parseValue } from "./value";
 
 // hooks are only ever used in the react tree so this is fine
@@ -44,7 +44,7 @@ export const CustomElementContext = (props: CustomElementContextProps) => {
   const [isDisabled, setIsDisabled] = useState(false);
   const [value, setValue] = useState<Value | null | typeof specialMissingValue>(specialMissingValue);
   const [config, setConfig] = useState<Config | typeof specialMissingValue>(specialMissingValue);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [environmentId, setEnvironmentId] = useState<string | null>(null);
   const [item, setItem] = useState<ItemInfo | null>(null);
   const [variant, setVariant] = useState<Readonly<{ id: string; codename: string }> | null>(null);
@@ -70,10 +70,6 @@ export const CustomElementContext = (props: CustomElementContextProps) => {
 
   useEffect(() => {
     CustomElement.init((element, context) => {
-      if (!isConfig(element.config)) {
-        setError("The element's config is not valid!");
-        return;
-      }
       const parsedValue = parseValue(element.value);
       if (parsedValue === "invalidValue") {
         console.warn(`Custom element received invalid value "${element.value}". Treating it as a missing value.`);

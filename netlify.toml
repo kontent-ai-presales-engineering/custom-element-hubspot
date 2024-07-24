@@ -1,0 +1,5 @@
+[dev]
+command = "npm run uiDev"
+[dev.https]
+certFile = "devCerts/devCert.pem"
+keyFile = "devCerts/devKey.pem"

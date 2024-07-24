@@ -1,6 +1,3 @@
-export type Config = Readonly<{
-  textElementCodename: string;
-}>;
+export type Config = Readonly<Record<string, never>>;
 
-export const isConfig = (value: Readonly<Record<string, unknown>> | null) =>
-  value !== null; // use better check
+export const isConfig = () => true;

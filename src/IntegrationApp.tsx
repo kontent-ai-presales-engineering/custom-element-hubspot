@@ -1,60 +1,46 @@
-import { useState } from 'react';
-import { useConfig, useIsDisabled, useItemInfo, useEnvironmentId, useValue, useVariantInfo } from './customElement/CustomElementContext';
-import { promptToSelectAssets, promptToSelectItems, useElements } from './customElement/selectors';
+import { useEffect, useState } from 'react';
+import { useIsDisabled, useValue } from './customElement/CustomElementContext';
 
 export const IntegrationApp = () => {
-  const [selectedAssetNames, setSelectedAssetNames] = useState<ReadonlyArray<string>>([]);
-  const [selectedItemNames, setSelectedItemNames] = useState<ReadonlyArray<string>>([]);
-
-  // use this to access/modify this element's value
+  const [availableForms, setAvailableForms] = useState<ReadonlyArray<Form> | null>(null);
   const [elementValue, setElementValue] = useValue();
-  // get whether this element should be disabled
+
+  useEffect(() => {
+    if (availableForms) {
+      return;
+    }
+    // fetch the forms from your service
+    fetch("/.netlify/functions/load-available-forms")
+      .then(response => response.json())
+      .then(forms => setAvailableForms(forms));
+  }, [availableForms]);
+
   const isDisabled = useIsDisabled();
-  // this custom element's configuration (defined in the content type in the Kontent.ai app)
-  const config = useConfig();
-  const projectId = useEnvironmentId();
-  const item = useItemInfo();
-  const variant = useVariantInfo();
-
-  // use this to get (updated) value of other elements in this item, the elements must be allowed in the content type (see https://kontent.ai/learn/docs/custom-elements)
-  const watchedElementsValues = useElements([config.textElementCodename]);
-
-  const selectAssets = () =>
-    // use this to prompt the user to select assets, the selected assets' details will be returned in the promise
-    promptToSelectAssets({ allowMultiple: true, fileType: "images" })
-      .then(assets => setSelectedAssetNames(assets?.map(asset => asset.name) ?? []));
-
-  const selectItems = () =>
-    // use this to prompt the user to select items, the selected items' details will be returned in the promise
-    promptToSelectItems({ allowMultiple: true })
-      .then(items => setSelectedItemNames(items?.map(item => item.name) ?? []));
 
   return (
     <div>
-      <h2>Build your custom element here.</h2>
-      <button onClick={selectAssets}>Select an asset</button>
-      <h2>Selected assets</h2>
-      <section>{selectedAssetNames.join(", ")}</section>
-
-      <h2>Loaded data</h2>
-      <section>
-        {JSON.stringify({
-          selectedAssetNames,
-          selectedItemNames,
-          elementValue,
-          setElementValue,
-          isDisabled,
-          config,
-          projectId,
-          item,
-          variant,
-          watchedElementsValues,
-          selectAssets,
-          selectItems,
-        })}
-      </section>
+      <select
+        disabled={isDisabled}
+        value={elementValue?.formId || ''}
+        onChange={e => {
+          const formId = e.target.value;
+          setElementValue({ formId });
+        }}
+      >
+        <option value="">Select a form</option>
+        {availableForms?.map(form => (
+          <option key={form.id} value={form.id}>
+            {form.name}
+          </option>
+        ))}
+      </select>
     </div>
   );
 };
 
 IntegrationApp.displayName = 'IntegrationApp';
+
+type Form = Readonly<{
+  id: string;
+  name: string;
+}>;
