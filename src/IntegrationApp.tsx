@@ -4,6 +4,7 @@ import { useIsDisabled, useValue } from './customElement/CustomElementContext';
 export const IntegrationApp = () => {
   const [availableForms, setAvailableForms] = useState<ReadonlyArray<Form> | null>(null);
   const [elementValue, setElementValue] = useValue();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (availableForms) {
@@ -17,23 +18,32 @@ export const IntegrationApp = () => {
 
   const isDisabled = useIsDisabled();
 
+  const selectedForm = availableForms?.find(form => form.id === elementValue?.formId);
+
   return (
     <div>
-      <select
-        disabled={isDisabled}
-        value={elementValue?.formId || ''}
-        onChange={e => {
-          const formId = e.target.value;
-          setElementValue({ formId });
-        }}
+      <div
+        className={`select ${isDisabled ? "disabled" : ""} ${isDropdownOpen ? "open" : ""}`}
+        onClick={() => setIsDropdownOpen(prev => !prev)}
       >
-        <option value="">Select a form</option>
-        {availableForms?.map(form => (
-          <option key={form.id} value={form.id}>
-            {form.name}
-          </option>
-        ))}
-      </select>
+        {selectedForm?.name || "Select a form"}
+      </div>
+      {isDropdownOpen && (
+        <div className="options">
+          {availableForms?.map(form => (
+            <div
+              key={form.id}
+              className={`option ${form.id === selectedForm?.id ? "selected" : ""}`}
+              onClick={() => {
+                setIsDropdownOpen(false);
+                setElementValue({ formId: form.id });
+              }}
+            >
+              {form.name}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

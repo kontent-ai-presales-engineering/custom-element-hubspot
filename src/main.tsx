@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import '@kontent-ai/stylekit';
 import { EnsureKontentAsParent } from "./customElement/EnsureKontentAsParent";
 import { IntegrationApp } from './IntegrationApp';
 import { CustomElementContext } from './customElement/CustomElementContext';
