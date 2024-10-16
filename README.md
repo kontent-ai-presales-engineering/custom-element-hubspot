@@ -13,3 +13,10 @@ To start the development server run:
 The function is needed to load forms from hubspot and avoid passing the Hubspot access key to the FE application.
 You can find the function here `netlify/functions/load-available-forms.mts`.
 
+# Deployment
+
+The custom element uses a netlify function so deploying to Netlify is the easiest option.
+If you need to deploy to a different cloud provider, you'll need to adjust the function at `netlify/functions/load-available-forms.mts`.
+
+Remember to set the **`HUBSPOT_ACCESS_KEY`** environment variable for the function to work properly.
+
